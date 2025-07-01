@@ -4,7 +4,9 @@ import { useForm } from "react-hook-form";
 
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {UserPlus } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -49,7 +51,7 @@ function App() {
       <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-lg shadow-2xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-primary">Inscription</CardTitle>
+          <CardTitle className="text-3xl font-bold text-blue-500">Inscription</CardTitle>
           <CardDescription>Créez votre espace personnel de la Maison des Mines et des Ponts</CardDescription>
         </CardHeader>
         <CardContent>
@@ -154,6 +156,10 @@ function App() {
                   </FormItem>
                 )}
               />
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                S'inscrire
+              </Button>
             </form>
           </Form>
         </CardContent>
