@@ -6,7 +6,7 @@ import './App.css'
 function Counter(props) {
   const {count, setCount} = props
   return  <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
+        <button onClick={() => setCount((count) => count * 2)}>
           count is {count}
         </button>
       </div>
