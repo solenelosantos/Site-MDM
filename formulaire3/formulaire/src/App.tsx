@@ -51,7 +51,7 @@ function App() {
       <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-lg shadow-2xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-blue-500">Inscription</CardTitle>
+          <CardTitle className="text-3xl font-bold text-pink-500">Inscription</CardTitle>
           <CardDescription>Créez votre espace personnel de la Maison des Mines et des Ponts</CardDescription>
         </CardHeader>
         <CardContent>
