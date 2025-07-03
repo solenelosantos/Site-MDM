@@ -1,5 +1,3 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
-
 import {
   Sidebar,
   SidebarContent,
@@ -9,50 +7,44 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-// Menu items.
+// Menu items avec images SVG (via balise <img />)
 const items = [
   {
-    title: "Home",
+    title: "Mes informations",
     url: "#",
-    icon: Home,
+    icon: "/icons/mon_espace_personnel.svg",
   },
   {
-    title: "Inbox",
+    title: "Mes documents",
     url: "#",
-    icon: Inbox,
+    icon: "/icons/mes_documents.svg",
   },
   {
-    title: "Calendar",
+    title: "Déposer un document",
     url: "#",
-    icon: Calendar,
+    icon: "/icons/deposer_un_document.svg",
   },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-]
+];
 
 export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
+                    <a href={item.url} className="flex items-center gap-2">
+                      <img
+                        src={item.icon}
+                        alt=""
+                        className="w-5 h-5 shrink-0"
+                      />
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
@@ -63,5 +55,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }
