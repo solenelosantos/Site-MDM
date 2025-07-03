@@ -1,4 +1,4 @@
-import iconEspace from './assets/icon_mon_espace_personnel.svg'
+import iconEspace from './icons/icon_mon_espace_personnel.svg'
 import './Perso.css'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,20 +43,16 @@ function Perso() {
     <TableRow>
       <TableCell className="text-left">Juillet</TableCell>
       <TableCell>200.00 €</TableCell>
-      <TableCell className="text-right">Dû</TableCell>
+      <TableCell className = "text-right">Dû</TableCell>
     </TableRow>
   </TableBody>
 </Table>
     <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
             <div className="mx-auto max-w-3xl space-y-8">
-                <header className="flex items-center justify-between">
-                     <h1 className="text-3xl font-bold font-headline text-primary-foreground">
-                        MySpaceGen
-                    </h1>
                     <Button>
                         Déconnexion
                     </Button>
-                </header>
+                
 
                 <Card className="w-full">
                     <CardHeader>
