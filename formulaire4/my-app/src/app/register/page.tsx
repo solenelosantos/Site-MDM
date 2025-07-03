@@ -1,8 +1,9 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter} from "next/navigation"; 
+import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -34,12 +35,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { registerSchema, RegisterSchema } from "@/lib/schemas";
 
+export default function Signup() {
+  const router = useRouter();
+  const { toast } = useToast();  
 
-
-
-function Signup() {
-  const form = useForm({
+  const form = useForm<RegisterSchema>({
+  resolver: zodResolver(registerSchema),
    defaultValues: {
       firstName: "",
       lastName: "",
@@ -49,6 +52,20 @@ function Signup() {
       isBursary: false,
   },
 });
+
+function onSubmit(data: RegisterSchema) {
+  const usersJson = localStorage.getItem("users");
+  let users: RegisterSchema[] = usersJson ? JSON.parse(usersJson) : [];
+
+  if (users.some((u) => u.email === data.email)) {
+    toast({
+      title: "Erreur d'inscription",
+      description: "Un compte avec cette adresse e-mail existe déjà.",
+      variant: "destructive",
+    });
+    return;
+  }
+
   return (
       <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-lg shadow-2xl">
@@ -58,7 +75,7 @@ function Signup() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -177,6 +194,4 @@ function Signup() {
       </Card>
     </main>
   );
-}
-
-export default Signup
+}}

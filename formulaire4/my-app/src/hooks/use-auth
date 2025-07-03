@@ -1,0 +1,97 @@
+"use client";
+
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+
+export interface User {
+  id: string;
+  nom: string;
+  prenom: string;
+  anneeEtude: string;
+  boursier: 'Oui' | 'Non';
+  passwordHash: string;
+}
+
+export type SessionUser = Omit<User, 'passwordHash'>;
+
+const USERS_STORAGE_KEY = 'my-space-gen-users';
+const LOGGED_IN_USER_KEY = 'my-space-gen-session';
+
+async function hashPassword(password: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+export const useAuth = () => {
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    try {
+      const sessionUser = localStorage.getItem(LOGGED_IN_USER_KEY);
+      if (sessionUser) {
+        setUser(JSON.parse(sessionUser));
+      }
+    } catch (error) {
+      console.error("Failed to parse user from localStorage", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const register = useCallback(async (data: Omit<User, 'id' | 'passwordHash'> & { password: string }): Promise<{ success: boolean, message: string, userId?: string }> => {
+    const users: User[] = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
+    
+    let baseId = `${data.prenom.toLowerCase()}.${data.nom.toLowerCase()}`.replace(/\s+/g, '');
+    let newId = baseId;
+    let counter = 1;
+    
+    while (users.some(u => u.id === newId)) {
+        newId = `${baseId}${counter}`;
+        counter++;
+    }
+    
+    const passwordHash = await hashPassword(data.password);
+    const newUser: User = { 
+        id: newId,
+        nom: data.nom,
+        prenom: data.prenom,
+        anneeEtude: data.anneeEtude,
+        boursier: data.boursier,
+        passwordHash
+    };
+    users.push(newUser);
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    
+    return { success: true, message: `Inscription réussie! Votre identifiant est: ${newId}`, userId: newId };
+  }, []);
+
+  const login = useCallback(async (id: string, password: string): Promise<{ success: boolean, message: string }> => {
+    const users: User[] = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
+    const foundUser = users.find(u => u.id === id);
+
+    if (foundUser && foundUser.passwordHash) {
+      const providedPasswordHash = await hashPassword(password);
+      if (foundUser.passwordHash === providedPasswordHash) {
+        const { passwordHash, ...sessionData } = foundUser;
+        localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(sessionData));
+        setUser(sessionData as User);
+        return { success: true, message: 'Connexion réussie!' };
+      }
+    }
+
+    return { success: false, message: 'Identifiant ou mot de passe incorrect.' };
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem(LOGGED_IN_USER_KEY);
+    setUser(null);
+    router.push('/login');
+  }, [router]);
+
+  return { user, isLoading, register, login, logout };
+};

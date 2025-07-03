@@ -1,7 +1,11 @@
 "use client";
 
 import iconEspace from './icons/icon_mon_espace_personnel.svg'
+import {useToast} from "@/hooks/use-toast";
 import { useState, type ChangeEvent, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,13 +19,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { RegisterSchema, profileSchema, ProfileSchema } from '@/lib/schemas';
+
+type User = RegisterSchema & { id: string }
 
 export default function DashboardPage() {
     const { toast } = useToast();
+    const router = useRouter();
+    const [user, setUser] = useState<User | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
+    const[isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
-
     const getUserFilesKey = (userId: string) => `user-files-${userId}`;
+    const form = useForm<ProfileSchema>({
+        resolver: zodResolver(profileSchema),
+    });
 
     useEffect(() => {
         if (user) {
@@ -207,6 +220,4 @@ function Perso() {
         </div>
         </>
     );
-}
-
-export default Perso;
+}}

@@ -38,7 +38,8 @@ function Login(data: LoginSchema) {
   const router = useRouter();
   const { toast } = useToast();
   
-  const form = useForm({
+  const form = useForm<LoginSchema>({
+   resolver: zodResolver(loginSchema),
    defaultValues: {
       email: "",
       password: "",
