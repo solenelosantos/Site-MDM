@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 
+:root {
+  --primary-foreground: #000;
+}
+
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
