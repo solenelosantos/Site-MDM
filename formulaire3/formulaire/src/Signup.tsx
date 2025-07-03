@@ -1,4 +1,7 @@
+"use client";
+
 import './App.css'
+import './index.css'
 
 import { useForm } from "react-hook-form";
 
@@ -36,7 +39,7 @@ import {
 
 
 
-function App() {
+function Signup() {
   const form = useForm({
    defaultValues: {
       firstName: "",
@@ -138,14 +141,15 @@ function App() {
                 control={form.control}
                 name="isBursary"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+                  console.log("Checkbox value:", field.value),
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm ">
                     <FormControl>
-                      <Checkbox
+                      <Checkbox 
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => field.onChange(checked)}
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
+                    <div className="space-y-1 leading-none ">
                       <FormLabel>
                         Êtes-vous boursier ?
                       </FormLabel>
@@ -167,10 +171,11 @@ function App() {
           <p className="text-sm text-muted-foreground">
             Déjà un compte ?{" "}
           </p>
+          <button className="bg-pink-500 text-white p-2 rounded hover:bg-pink-600">Test</button>
         </CardFooter>
       </Card>
     </main>
   );
 }
 
-export default App
+export default Signup
