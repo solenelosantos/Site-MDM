@@ -11,5 +11,6 @@ createRoot(document.getElementById('root')!).render(
     <Signup />
     <Login/>
     <Perso/>
+    <Sidebar />
   </StrictMode>,
 )
