@@ -1,7 +1,11 @@
+"use client";
+
 import iconEspace from './icons/icon_mon_espace_personnel.svg'
-import './Perso.css'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { useState, type ChangeEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Upload, File as FileIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,6 +15,71 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+
+export default function DashboardPage() {
+    const { toast } = useToast();
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+
+    const getUserFilesKey = (userId: string) => `user-files-${userId}`;
+
+    useEffect(() => {
+        if (user) {
+            try {
+                const userFilesKey = getUserFilesKey(user.id);
+                const storedFiles = localStorage.getItem(userFilesKey);
+                if (storedFiles) {
+                    setUploadedFiles(JSON.parse(storedFiles));
+                }
+            } catch (error) {
+                console.error("Failed to parse files from localStorage", error);
+                // Optionally, show a toast to the user
+                toast({
+                    title: "Erreur",
+                    description: "Impossible de charger la liste de vos documents.",
+                    variant: "destructive",
+                });
+            }
+        }
+    }, [user, toast]);
+
+    if (!user) {
+        return null;
+    }
+    
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setSelectedFile(event.target.files[0]);
+        } else {
+            setSelectedFile(null);
+        }
+    };
+
+    const handleUpload = () => {
+        if (selectedFile && user) {
+            const newFiles = [...uploadedFiles, selectedFile.name];
+            setUploadedFiles(newFiles);
+            localStorage.setItem(getUserFilesKey(user.id), JSON.stringify(newFiles));
+            
+            setSelectedFile(null);
+            
+            const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+            if (fileInput) {
+                fileInput.value = '';
+            }
+
+            toast({
+                title: "Succès",
+                description: `Le fichier "${selectedFile.name}" a été déposé.`,
+            });
+        } else {
+            toast({
+                title: "Erreur",
+                description: "Veuillez sélectionner un fichier à déposer.",
+                variant: "destructive",
+            });
+        }
+    };
 
 function Perso() {
 
@@ -103,6 +172,35 @@ function Perso() {
                             Déposez vos documents importants ici.
                         </CardDescription>
                     </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                             <Input id="file-upload" type="file" onChange={handleFileChange} className="flex-grow" />
+                             <Button onClick={handleUpload} disabled={!selectedFile}>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Déposer
+                            </Button>
+                        </div>
+                         {selectedFile && (
+                            <p className="text-sm text-muted-foreground">
+                                Fichier sélectionné: {selectedFile.name}
+                            </p>
+                        )}
+                    </CardContent>
+                     {uploadedFiles.length > 0 && (
+                        <CardFooter className="flex flex-col items-start gap-4 border-t pt-6">
+                             <h4 className="font-medium text-sm">Fichiers déposés:</h4>
+                            <ul className="space-y-2 w-full">
+                                {uploadedFiles.map((fileName, index) => (
+                                    <li key={index} className="flex items-center justify-between text-sm p-2 rounded-md bg-muted">
+                                        <div className="flex items-center gap-2">
+                                            <FileIcon className="h-4 w-4 text-muted-foreground" />
+                                            <span className="font-mono">{fileName}</span>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardFooter>
+                    )}
                 </Card>
 
             </div>
@@ -111,4 +209,4 @@ function Perso() {
     );
 }
 
-export default Perso
+export default Perso;
