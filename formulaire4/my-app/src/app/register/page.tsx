@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {UserPlus } from "lucide-react";
+import Link from "next/link";
+
 import {
   Form,
   FormControl,
@@ -167,8 +169,10 @@ function Signup() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             Déjà un compte ?{" "}
+            <Link href="/" className="font-semibold text-primary hover:underline">
+              Connectez-vous
+            </Link>
           </p>
-          <button className="bg-pink-500 text-white p-2 rounded hover:bg-pink-600">Test</button>
         </CardFooter>
       </Card>
     </main>
