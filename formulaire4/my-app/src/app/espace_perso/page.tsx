@@ -1,73 +1,62 @@
-"use client"; // Indique que ce composant est exécuté côté client dans Next.js
+"use client"; // Indique que ce composant doit être rendu côté client (Next.js)
 
-// Imports de bibliothèques externes et d’icônes
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Award, Edit, GraduationCap, LogOut, Mail, User as UserIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  Award, Edit, GraduationCap, LogOut, Mail, User as UserIcon,
+  Upload, File as FileIcon
+} from "lucide-react"; // Import d'icônes Lucide
+import { useRouter } from "next/navigation"; // Pour rediriger avec Next.js
 import { useState, type ChangeEvent, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm } from "react-hook-form"; // Hook pour les formulaires
 
-// Composants UI personnalisés
+// Import des composants UI réutilisables
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Upload, File as FileIcon } from "lucide-react";
 import {
-  Card, CardContent, CardDescription, CardFooter,
-  CardHeader, CardTitle
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
 } from "@/components/ui/card";
 import {
-  Dialog, DialogContent, DialogDescription,
-  DialogFooter, DialogHeader, DialogTitle,
-  DialogTrigger, DialogClose,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader,
+  DialogTitle, DialogTrigger, DialogClose
 } from "@/components/ui/dialog";
 import {
-  Form, FormControl, FormField, FormItem,
-  FormLabel, FormDescription, FormMessage
+  Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage
 } from "@/components/ui/form";
-import {
-  Table, TableBody, TableCaption, TableCell,
-  TableHead, TableHeader, TableRow
-} from "@/components/ui/table";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import {
-  Select, SelectContent, SelectItem,
-  SelectTrigger, SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { profileSchema, ProfileSchema, RegisterSchema } from "@/lib/schemas";
+import { Skeleton } from "@/components/ui/skeleton"; // Composant de chargement
+import { useToast } from "@/hooks/use-toast"; // Hook pour les notifications
+import { profileSchema, ProfileSchema, RegisterSchema } from "@/lib/schemas"; // Schémas de validation
 
-// Définition du type User à partir du schéma d'enregistrement
-type User = RegisterSchema;
+type User = RegisterSchema; // Alias pour simplifier
 
-// Composant principal
 export default function DashboardPage() {
-  const router = useRouter(); // Pour navigation dans Next.js
-  const { toast } = useToast(); // Hook pour afficher des notifications
+  const router = useRouter(); // Hook de navigation
+  const { toast } = useToast(); // Hook de notification
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Fichier sélectionné
+  const getUserFilesKey = (userId: string) => `user-files-${userId}`; // Clé locale pour stocker les fichiers
+  const [user, setUser] = useState<User | null>(null); // Données utilisateur
+  const [isMounted, setIsMounted] = useState(false); // Vérifie si le composant est monté (évite SSR)
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; dataUrl: string }[]>([]); // Fichiers uploadés
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false); // Contrôle de la modale de profil
 
-  // États React
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Fichier en cours de sélection
-  const getUserFilesKey = (userId: string) => `user-files-${userId}`; // Génère une clé unique par utilisateur
-  const [user, setUser] = useState<User | null>(null); // Utilisateur connecté
-  const [isMounted, setIsMounted] = useState(false); // Pour gérer le rendu uniquement après le montage du composant
-  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; dataUrl: string }[]>([]); // Liste des fichiers déposés
-  const [isEditDialogOpen, setEditDialogOpen] = useState(false); // Contrôle d’ouverture du modal d'édition
-
-  // Formulaire pour éditer le profil, basé sur Zod et React Hook Form
+  // Initialisation du formulaire avec validation Zod
   const form = useForm<ProfileSchema>({
     resolver: zodResolver(profileSchema),
   });
 
-  // useEffect pour récupérer l'utilisateur connecté et ses fichiers depuis le localStorage
+  // Récupération des données utilisateur et fichiers au montage
   useEffect(() => {
     try {
       const loggedInUserJson = localStorage.getItem("loggedInUser");
-
       if (loggedInUserJson) {
         const loggedInUser = JSON.parse(loggedInUserJson);
         setUser(loggedInUser);
 
-        // Initialise le formulaire avec les données de l'utilisateur
+        // Pré-remplit le formulaire
         form.reset({
           firstName: loggedInUser.firstName,
           lastName: loggedInUser.lastName,
@@ -75,24 +64,22 @@ export default function DashboardPage() {
           studyYear: loggedInUser.studyYear,
         });
 
-        // Charge les fichiers déjà déposés
+        // Charge les fichiers utilisateur
         const userFilesJson = localStorage.getItem(getUserFilesKey(loggedInUser.email));
         if (userFilesJson) {
           setUploadedFiles(JSON.parse(userFilesJson));
         }
-
       } else {
-        // Redirige vers la page d’accueil si non connecté
-        router.replace("/");
+        router.replace("/"); // Redirection si utilisateur non connecté
       }
     } catch (error) {
       router.replace("/");
     } finally {
-      setIsMounted(true);
+      setIsMounted(true); // Indique que le composant est prêt
     }
   }, [router, form]);
 
-  // Gère la sélection d’un fichier
+  // Mise à jour du fichier sélectionné
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       setSelectedFile(event.target.files[0]);
@@ -101,9 +88,9 @@ export default function DashboardPage() {
     }
   };
 
-  // Fonction de dépôt d’un fichier
+  // Gère l’upload d’un fichier sélectionné
   const handleUpload = () => {
-    if (selectedFile && user) {
+    if (selectedFile && user && user.email) {
       const reader = new FileReader();
 
       reader.onload = () => {
@@ -111,31 +98,27 @@ export default function DashboardPage() {
 
         const newFile = {
           name: selectedFile.name,
-          dataUrl: base64, // fichier encodé en base64
+          dataUrl: base64,
         };
 
         const existingFilesJson = localStorage.getItem(getUserFilesKey(user.email));
         const existingFiles = existingFilesJson ? JSON.parse(existingFilesJson) : [];
 
         const updatedFiles = [...existingFiles, newFile];
-
-        // Sauvegarde mise à jour
         localStorage.setItem(getUserFilesKey(user.email), JSON.stringify(updatedFiles));
         setUploadedFiles(updatedFiles);
 
-        // Réinitialise le champ de fichier
         setSelectedFile(null);
         const fileInput = document.getElementById('file-upload') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
 
-        // Affiche toast de confirmation
         toast({
           title: "Succès",
           description: `Le fichier "${selectedFile.name}" a été déposé.`,
         });
       };
 
-      reader.readAsDataURL(selectedFile); // Convertit le fichier en base64
+      reader.readAsDataURL(selectedFile);
     } else {
       toast({
         title: "Erreur",
@@ -145,14 +128,14 @@ export default function DashboardPage() {
     }
   };
 
-  // Déconnexion
+  // Déconnecte l'utilisateur
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
     toast({ title: "Déconnexion", description: "Vous avez été déconnecté." });
     router.push("/");
   };
 
-  // Mise à jour du profil utilisateur
+  // Enregistre les modifications de profil
   const handleProfileUpdate = (data: ProfileSchema) => {
     if (!user) return;
 
@@ -165,12 +148,9 @@ export default function DashboardPage() {
 
     if (userIndex !== -1) {
       users[userIndex] = updatedUser;
-
-      // Sauvegarde mise à jour
       localStorage.setItem("users", JSON.stringify(users));
       localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
       setUser(updatedUser);
-
       toast({ title: "Profil mis à jour", description: "Vos informations ont été enregistrées." });
       setEditDialogOpen(false);
     } else {
@@ -178,7 +158,7 @@ export default function DashboardPage() {
     }
   };
 
-  // Affiche des squelettes de chargement avant que le composant ne soit monté
+  // Affiche un squelette en attendant le chargement
   if (!isMounted || !user) {
     return (
       <div className="p-4 md:p-8 space-y-4">
@@ -205,7 +185,7 @@ export default function DashboardPage() {
       <main className="container mx-auto p-4 md:p-8">
         <div className="flex flex-col gap-15">
 
-          {/* Carte Profil */}
+          {/* Carte d'informations personnelles */}
           <Card className="shadow-xl overflow-hidden">
             <CardHeader className="bg-primary/10">
               <CardTitle className="text-3xl text-primary">Espace Personnel</CardTitle>
@@ -216,16 +196,41 @@ export default function DashboardPage() {
             <CardContent className="p-6 grid gap-6">
               <h3 className="text-xl font-semibold text-foreground">Vos informations</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                {/* Informations utilisateur */}
-                {/* ... (nom, email, année d'étude, statut boursier) */}
+                {/* Nom complet */}
+                <div className="flex items-center gap-3">
+                  <UserIcon className="h-5 w-5 text-primary" />
+                  <span><strong>Nom complet :</strong> {user.firstName} {user.lastName}</span>
+                </div>
+                {/* Email */}
+                <div className="flex items-center gap-3">
+                  <Mail className="h-5 w-5 text-primary" />
+                  <span><strong>Email :</strong> {user.email}</span>
+                </div>
+                {/* Année d'étude */}
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                  <span><strong>Année d'étude :</strong> {user.studyYear}</span>
+                </div>
+                {/* Statut boursier */}
+                <div className="flex items-center gap-3">
+                  <Award className="h-5 w-5 text-primary" />
+                  <span><strong>Statut boursier :</strong>
+                    {user.isBursary ? (
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">Oui</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-red-100 text-red-800">Non</Badge>
+                    )}
+                  </span>
+                </div>
               </div>
             </CardContent>
-
-            {/* Modal d’édition de profil */}
             <CardFooter>
+              {/* Bouton d'édition du profil avec modale */}
               <Dialog open={isEditDialogOpen} onOpenChange={setEditDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button><Edit className="mr-2 h-4 w-4" /> Modifier mon profil</Button>
+                  <Button>
+                    <Edit className="mr-2 h-4 w-4" /> Modifier mon profil
+                  </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
@@ -234,9 +239,77 @@ export default function DashboardPage() {
                       Mettez à jour vos informations personnelles ici.
                     </DialogDescription>
                   </DialogHeader>
-
-                  {/* Formulaire d'édition */}
-                  {/* ... (prénom, nom, email, année d'étude) */}
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleProfileUpdate)} className="space-y-4 py-4">
+                      {/* Prénom */}
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Prénom</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {/* Nom */}
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nom</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {/* Email (non modifiable) */}
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl><Input {...field} readOnly disabled /></FormControl>
+                            <FormDescription>L'adresse e-mail ne peut pas être modifiée.</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {/* Année d'étude (select) */}
+                      <FormField
+                        control={form.control}
+                        name="studyYear"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Année d'étude</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger><SelectValue placeholder="Sélectionnez votre année" /></SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="L1">Licence 1</SelectItem>
+                                <SelectItem value="L2">Licence 2</SelectItem>
+                                <SelectItem value="L3">Licence 3</SelectItem>
+                                <SelectItem value="M1">Master 1</SelectItem>
+                                <SelectItem value="M2">Master 2</SelectItem>
+                                <SelectItem value="Doctorat">Doctorat</SelectItem>
+                                <SelectItem value="Autre">Autre</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {/* Boutons modale */}
+                      <DialogFooter>
+                        <DialogClose asChild><Button variant="outline" type="button">Annuler</Button></DialogClose>
+                        <Button type="submit">Enregistrer</Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
                 </DialogContent>
               </Dialog>
             </CardFooter>
@@ -244,21 +317,45 @@ export default function DashboardPage() {
 
           {/* Tableau des loyers */}
           <Table className='text-blue-500'>
-            {/* ... Mois, Somme, Statut (acquitté ou dû) */}
+            <TableCaption> Statuts de vos derniers loyers </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Mois</TableHead>
+                <TableHead className="text-center">Somme</TableHead>
+                <TableHead className="text-right">Statut</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="text-left">Mai</TableCell>
+                <TableCell className="text-center">200.00 €</TableCell>
+                <TableCell className="text-right">Acquitté</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="text-left">Juin</TableCell>
+                <TableCell className="text-center">200.00 €</TableCell>
+                <TableCell className="text-right">Acquitté</TableCell>
+              </TableRow>
+              <TableRow className="text-red-500">
+                <TableCell className="text-left">Juillet</TableCell>
+                <TableCell className="text-center">1.00 €</TableCell>
+                <TableCell className="text-right">Dû</TableCell>
+              </TableRow>
+            </TableBody>
           </Table>
 
-          {/* Carte de dépôt de fichiers */}
+          {/* Section de dépôt de fichiers */}
           <Card>
             <CardHeader>
               <CardTitle>Mes Documents</CardTitle>
               <CardDescription>Déposez vos documents importants ici.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Upload file */}
               <div className="flex items-center space-x-2">
                 <Input id="file-upload" type="file" onChange={handleFileChange} className="flex-grow" />
                 <Button onClick={handleUpload} disabled={!selectedFile}>
-                  <Upload className="mr-2 h-4 w-4" /> Déposer
+                  <Upload className="mr-2 h-4 w-4" />
+                  Déposer
                 </Button>
               </div>
               {selectedFile && (
@@ -267,8 +364,6 @@ export default function DashboardPage() {
                 </p>
               )}
             </CardContent>
-
-            {/* Liste des fichiers déposés */}
             {uploadedFiles.length > 0 && (
               <CardFooter className="flex flex-col items-start gap-4 border-t pt-6">
                 <h4 className="font-medium text-sm">Fichiers déposés:</h4>
