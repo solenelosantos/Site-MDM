@@ -3,11 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Award, Edit, GraduationCap, LogOut, Mail, User as UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useState, type ChangeEvent, useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Upload, File as FileIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -35,6 +36,7 @@ import {
   FormDescription,
   FormMessage,
 } from "@/components/ui/form";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -52,8 +54,12 @@ type User = RegisterSchema;
 export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const getUserFilesKey = (userId: string) => `user-files-${userId}`;
   const [user, setUser] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; dataUrl: string }[]>([]);
+;
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
 
   const form = useForm<ProfileSchema>({
@@ -72,6 +78,12 @@ export default function DashboardPage() {
             email: loggedInUser.email,
             studyYear: loggedInUser.studyYear,
         });
+
+        const userFilesJson = localStorage.getItem(getUserFilesKey(loggedInUser.email));
+        if (userFilesJson) {
+          setUploadedFiles(JSON.parse(userFilesJson));
+        }
+
       } else {
         router.replace("/");
       }
@@ -82,6 +94,53 @@ export default function DashboardPage() {
     }
   }, [router, form]);
 
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setSelectedFile(event.target.files[0]);
+        } else {
+            setSelectedFile(null);
+        }
+    };
+
+const handleUpload = () => {
+  if (selectedFile && user) {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const base64 = reader.result as string;
+
+      const newFile = {
+        name: selectedFile.name,
+        dataUrl: base64, // image/pdf/etc. encodé en base64
+      };
+
+      const existingFilesJson = localStorage.getItem(getUserFilesKey(user.email));
+      const existingFiles = existingFilesJson ? JSON.parse(existingFilesJson) : [];
+
+      const updatedFiles = [...existingFiles, newFile];
+      localStorage.setItem(getUserFilesKey(user.email), JSON.stringify(updatedFiles));
+      setUploadedFiles(updatedFiles);
+
+      setSelectedFile(null);
+      const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+      toast({
+        title: "Succès",
+        description: `Le fichier "${selectedFile.name}" a été déposé.`,
+      });
+    };
+
+    reader.readAsDataURL(selectedFile); // Convertit en base64
+  } else {
+    toast({
+      title: "Erreur",
+      description: "Veuillez sélectionner un fichier à déposer.",
+      variant: "destructive",
+    });
+  }
+};
+  
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
     toast({ title: "Déconnexion", description: "Vous avez été déconnecté." });
@@ -259,7 +318,81 @@ export default function DashboardPage() {
                     </Dialog>
                 </CardFooter>
             </Card>
+            <Table className='text-blue-500'>
+  <TableCaption> Statuts de vos derniers loyers </TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Mois</TableHead>
+      <TableHead className="text-center">Somme</TableHead>
+      <TableHead className="text-right">Statut</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell className="text-left">Mai</TableCell>
+      <TableCell className="text-center">200.00 €</TableCell>
+      <TableCell className="text-right">Acquitté</TableCell>
+    </TableRow>
+    <TableRow>
+           <TableCell className="text-left">Juin</TableCell>
+      <TableCell className="text-center">200.00 €</TableCell>
+      <TableCell className="text-right">Acquitté</TableCell>
+    </TableRow>
+    <TableRow className="text-red-500">
+      <TableCell className="text-left">Juillet</TableCell>
+      <TableCell className="text-center">1.00 €</TableCell>
+      <TableCell className = "text-right">Dû</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+<Card>
+                    <CardHeader>
+                        <CardTitle>Mes Documents</CardTitle>
+                        <CardDescription>
+                            Déposez vos documents importants ici.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                             <Input id="file-upload" type="file" onChange={handleFileChange} className="flex-grow" />
+                             <Button onClick={handleUpload} disabled={!selectedFile}>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Déposer
+                            </Button>
+                        </div>
+                         {selectedFile && (
+                            <p className="text-sm text-muted-foreground">
+                                Fichier sélectionné: {selectedFile.name}
+                            </p>
+                        )}
+                    </CardContent>
+                     {uploadedFiles.length > 0 && (
+                        <CardFooter className="flex flex-col items-start gap-4 border-t pt-6">
+                             <h4 className="font-medium text-sm">Fichiers déposés:</h4>
+                            <ul className="space-y-2 w-full">
+                                {uploadedFiles.map((file, index) => (
+  <li key={index} className="flex items-center justify-between text-sm p-2 rounded-md bg-muted">
+    <div className="flex items-center gap-2">
+      <FileIcon className="h-4 w-4 text-muted-foreground" />
+      <span className="font-mono">{file.name}</span>
+    </div>
+    <a
+      href={file.dataUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 hover:underline text-xs"
+    >
+      Voir
+    </a>
+  </li>
+))}
+
+                            </ul>
+                        </CardFooter>
+                    )}
+                </Card>
         </main>
     </>
   );
 }
+
