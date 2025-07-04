@@ -46,6 +46,15 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { profileSchema, ProfileSchema, RegisterSchema } from "@/lib/schemas";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type User = RegisterSchema;
 
@@ -71,6 +80,7 @@ export default function DashboardPage() {
             lastName: loggedInUser.lastName,
             email: loggedInUser.email,
             studyYear: loggedInUser.studyYear,
+    
         });
       } else {
         router.replace("/");
@@ -131,6 +141,7 @@ export default function DashboardPage() {
         </header>
 
         <main className="container mx-auto p-4 md:p-8">
+        <div className="flex flex-col gap-15">
             <Card className="shadow-xl overflow-hidden">
                 <CardHeader className="bg-primary/10">
                     <CardTitle className="text-3xl text-primary">Espace Personnel</CardTitle>
@@ -259,6 +270,40 @@ export default function DashboardPage() {
                     </Dialog>
                 </CardFooter>
             </Card>
+            <Card className="shadow-xl overflow-hidden">
+                <CardHeader className="bg-primary/10">
+                <strong>Statuts de vos derniers loyers</strong>
+                </CardHeader>
+                <CardContent className="p-6 grid gap-6">
+                    <Table className='text-blue-500'>
+                        <TableHeader>
+                            <TableRow>
+                            <TableHead><strong>Mois</strong></TableHead>
+                            <TableHead className="text-center"><strong>Somme</strong></TableHead>
+                            <TableHead className="text-right"><strong>Statut</strong></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow>
+                            <TableCell className="text-left">Mai</TableCell>
+                            <TableCell className="text-center">200.00 €</TableCell>
+                            <TableCell className="text-right">Acquitté</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="text-left">Juin</TableCell>
+                            <TableCell className="text-center">200.00 €</TableCell>
+                            <TableCell className="text-right">Acquitté</TableCell>
+                            </TableRow>
+                            <TableRow className="text-red-500">
+                            <TableCell className="text-left">Juillet</TableCell>
+                            <TableCell className="text-center">200.00 €</TableCell>
+                            <TableCell className = "text-right">Dû</TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+            </div>
         </main>
     </>
   );
