@@ -23,11 +23,14 @@ Nous avons également utilisé la librairie "zod" pour valider les données sais
 
 Le passage à Next s'est fait jeudi donc l'adaptation de notre premier code React à Next a été un peu compliquée, mais nous avons réussi à adapter notre code pour qu'il fonctionne avec Next.js et la validation des données saisies par l'utilisateur.
 
-#### A ce stade, il reste énormément de perspectives de développement à parcourir. En l'état, notre code permet la navigation entre 3 pages : connexion (page par défaut), inscription, et espace personnel si la connexion est réussie. IL y a donc une mémorisation des données rentrées par l'utilisateur dans le formulaire d'inscription, mais pas de stockage de ces données pour le moment. De même, une fonctionnalité dans l'espace personnel permet à l'utilisateur de déposer des documents, mais ces derniers ne sont pas stockés pour le moment. En revanche, les documents déja déposés par l'utilisateur sont consultables par celui-ci même après déconnexion et reconnexion.
+#### A ce stade, il reste énormément de perspectives de développement à parcourir. 
+
+En l'état, notre code permet la navigation entre 3 pages : connexion (page par défaut), inscription, et espace personnel si la connexion est réussie. Il y a donc une mémorisation locale des données rentrées par l'utilisateur dans le formulaire d'inscription, mais pas de stockage permanent de ces données pour le moment. De même, une fonctionnalité dans l'espace personnel permet à l'utilisateur de déposer des documents, ils sont consultables par celui-ci même après déconnexion et reconnexion, mais ne sont pas stockés de façon permanente.
 Il n'y a pas encore de contraintes (format ou taille) sur les documents déposés.
+
 Le prototype visuel d'un tableau récapitulatif de la situation du résident vis à vis de ses paiements de loyer a été codé, mais celui-ci n'est pas dynamique : nous souhaitons à terme pouvoir le relier au logiciel CERI qui sert aux administrateurs de la Maison des Mines pour gérer les résidents et leurs paiements de loyer, mais nous ne savons pas encore si cela sera possible et si oui comment. De même, nous aimerions pouvoir relier le formulaire d'inscription à la base de données de la Maison des Mines pour que les données saisies par l'utilisateur soient stockées et puissent être consultées par les administrateurs. Nous n'avons pas encore commencé à travailler sur ces aspects.
 
-De manière générale, en tant qu'élèves piauleurs (responsables de l'attribution des chambres de la résidence), nous sommes réellement intéressés par le fait de développer ce site internet et de retravailler ce code a posteriori quand nous aurons plus de temps pour le faire, et les idées évoquées ci-dessus sont concrètes et ont vocation à être reprises.
+#### De manière générale, en tant qu'élèves piauleurs (responsables de l'attribution des chambres de la résidence), nous sommes réellement intéressés par le fait de développer ce site internet et de retravailler ce code a posteriori quand nous aurons plus de temps pour le faire, et les idées évoquées ci-dessus sont concrètes et ont vocation à être reprises.
 
 ## C) Exécuter le projet
 
