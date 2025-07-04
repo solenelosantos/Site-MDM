@@ -37,12 +37,55 @@ Le prototype visuel d'un tableau récapitulatif de la situation du résident vis
 ```bash
 npm run dev
 # or
-yarn dev
+yarn run dev
 # or
-pnpm dev
+pnpm run dev
 # or
-bun dev
+bun run dev
 ```
 
 Ouvrir [http://localhost:3000](http://localhost:3000) pour voir le résultat sur le navigateur.
 
+# Librairies//outils utilisés
+
+- Next.js (React 18+)
+- TypeScript
+- Tailwind CSS
+- shadcn/ui (composants UI)
+- react-hook-form (gestion de formulaire)
+- zod (validation de schémas)
+- @hookform/resolvers (intégration zod avec react-hook-form)
+- lucide-react (icônes SVG)
+
+# Composants shadcn/ui utilisés
+
+- Form
+- Input
+- Button
+- Card
+- Table
+- Checkbox
+- Dialog
+- Select
+- Toast
+
+Installation via CLI :
+
+```bash
+npx shadcn-ui@latest init
+npx shadcn-ui@latest add form input button card checkbox select toast dialog table
+```
+
+# Autres outils utilisés
+
+- `localStorage` : stockage temporaire des utilisateurs
+- `useRouter` (next/navigation) : redirections client
+- `"use client"` : composants côté client (obligatoire pour les hooks)
+
+# Structure
+
+- `/app/register/page.tsx` – Page d’inscription
+- `/app/espace_perso/page.tsx` – Page d'espace personnel
+- `/app/page.tsx` - Page de connexion
+- `/lib/schemas.ts` – Schémas zod
+- `/components/ui/` – Composants UI shadcn
