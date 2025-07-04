@@ -48,15 +48,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { profileSchema, ProfileSchema, RegisterSchema } from "@/lib/schemas";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 type User = RegisterSchema;
 
@@ -329,40 +320,80 @@ const handleUpload = () => {
                     </Dialog>
                 </CardFooter>
             </Card>
-            <Card className="shadow-xl overflow-hidden">
-                <CardHeader className="bg-primary/10">
-                <strong>Statuts de vos derniers loyers</strong>
-                </CardHeader>
-                <CardContent className="p-6 grid gap-6">
-                    <Table className='text-blue-500'>
-                        <TableHeader>
-                            <TableRow>
-                            <TableHead><strong>Mois</strong></TableHead>
-                            <TableHead className="text-center"><strong>Somme</strong></TableHead>
-                            <TableHead className="text-right"><strong>Statut</strong></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow>
-                            <TableCell className="text-left">Mai</TableCell>
-                            <TableCell className="text-center">200.00 €</TableCell>
-                            <TableCell className="text-right">Acquitté</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="text-left">Juin</TableCell>
-                            <TableCell className="text-center">200.00 €</TableCell>
-                            <TableCell className="text-right">Acquitté</TableCell>
-                            </TableRow>
-                            <TableRow className="text-red-500">
-                            <TableCell className="text-left">Juillet</TableCell>
-                            <TableCell className="text-center">200.00 €</TableCell>
-                            <TableCell className = "text-right">Dû</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-            </div>
+            <Table className='text-blue-500'>
+  <TableCaption> Statuts de vos derniers loyers </TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Mois</TableHead>
+      <TableHead className="text-center">Somme</TableHead>
+      <TableHead className="text-right">Statut</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell className="text-left">Mai</TableCell>
+      <TableCell className="text-center">200.00 €</TableCell>
+      <TableCell className="text-right">Acquitté</TableCell>
+    </TableRow>
+    <TableRow>
+           <TableCell className="text-left">Juin</TableCell>
+      <TableCell className="text-center">200.00 €</TableCell>
+      <TableCell className="text-right">Acquitté</TableCell>
+    </TableRow>
+    <TableRow className="text-red-500">
+      <TableCell className="text-left">Juillet</TableCell>
+      <TableCell className="text-center">1.00 €</TableCell>
+      <TableCell className = "text-right">Dû</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+<Card>
+                    <CardHeader>
+                        <CardTitle>Mes Documents</CardTitle>
+                        <CardDescription>
+                            Déposez vos documents importants ici.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                             <Input id="file-upload" type="file" onChange={handleFileChange} className="flex-grow" />
+                             <Button onClick={handleUpload} disabled={!selectedFile}>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Déposer
+                            </Button>
+                        </div>
+                         {selectedFile && (
+                            <p className="text-sm text-muted-foreground">
+                                Fichier sélectionné: {selectedFile.name}
+                            </p>
+                        )}
+                    </CardContent>
+                     {uploadedFiles.length > 0 && (
+                        <CardFooter className="flex flex-col items-start gap-4 border-t pt-6">
+                             <h4 className="font-medium text-sm">Fichiers déposés:</h4>
+                            <ul className="space-y-2 w-full">
+                                {uploadedFiles.map((file, index) => (
+  <li key={index} className="flex items-center justify-between text-sm p-2 rounded-md bg-muted">
+    <div className="flex items-center gap-2">
+      <FileIcon className="h-4 w-4 text-muted-foreground" />
+      <span className="font-mono">{file.name}</span>
+    </div>
+    <a
+      href={file.dataUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 hover:underline text-xs"
+    >
+      Voir
+    </a>
+  </li>
+))}
+
+                            </ul>
+                        </CardFooter>
+                    )}
+                </Card>
+        </div>
         </main>
     </>
   );
