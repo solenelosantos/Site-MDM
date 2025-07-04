@@ -66,6 +66,15 @@ function onSubmit(data: RegisterSchema) {
     return;
   }
 
+  users.push(data);
+  localStorage.setItem("users", JSON.stringify(users));
+
+  toast({
+    title: "Inscription réussie",
+    description: "Vous pouvez maintenant vous connecter ! ",
+  });
+    router.push("/");
+}
   return (
       <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-lg shadow-2xl">
@@ -194,4 +203,4 @@ function onSubmit(data: RegisterSchema) {
       </Card>
     </main>
   );
-}}
+}

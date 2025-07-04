@@ -6,7 +6,7 @@ export const registerSchema = z.object({
   email: z.string().email({ message: "Adresse e-mail invalide." }),
   password: z.string().min(8, { message: "Le mot de passe doit contenir au moins 8 caractères." }),
   studyYear: z.string({ required_error: "Veuillez sélectionner une année d'étude."}).min(1, { message: "Veuillez sélectionner une année d'étude." }),
-  isBursary: z.boolean().default(false),
+  isBursary: z.boolean(),
 });
 
 export const loginSchema = z.object({
